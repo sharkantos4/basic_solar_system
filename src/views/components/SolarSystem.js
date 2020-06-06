@@ -24,7 +24,7 @@ class SolarSystem extends React.Component {
         const near = 0.1;
         const far = 1000;
         const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        camera.position.z = 100;
+        camera.position.z = 50;
         camera.position.y = -100;
         camera.lookAt(0, 0, 0);
 
@@ -103,6 +103,16 @@ class SolarSystem extends React.Component {
         const earthMaterial = new THREE.MeshPhongMaterial({color: 0x2233AA, emissive: 0x112244});
         const earth = new THREE.Mesh(sphereGeometry, earthMaterial);
         objectsInSolarSystem.push(earth);
+        const moonMaterial = new THREE.MeshPhongMaterial({color: 0x777777, emissive: 0x222222});
+        const moon = new THREE.Mesh(sphereGeometry, moonMaterial);
+        const moonRotation = new THREE.Object3D();
+        const moonRotationAroundEarth = new THREE.Object3D();
+        moon.scale.set(0.2, 0.2, 0.2);
+        moonRotationAroundEarth.position.x = positions[2];  // Where earth is
+        moon.position.x = 1;
+        moonRotation.add(moonRotationAroundEarth);
+        moonRotationAroundEarth.add(moon);
+        scene.add(moonRotation);
 
         // Mars
         const marsMaterial = new THREE.MeshPhongMaterial({color: 0xF00F00, emissive: 0x0F0300});
@@ -117,15 +127,19 @@ class SolarSystem extends React.Component {
         // Saturn
         const saturnMaterial = new THREE.MeshPhongMaterial({color: 0xCBBC9B, emissive: 0x120200});
         const saturn = new THREE.Mesh(sphereGeometry, saturnMaterial);
-        const saturnRingMaterial = new THREE.MeshPhongMaterial({color: 0xCBBC9B, emissive: 0x120200});
+        objectsInSolarSystem.push(saturn);
+        
+        // Saturn ring
+        const saturnRingMaterial = new THREE.MeshPhongMaterial({color: 0xCBBC9B, emissive: 0x514226});
         const innerRadius = 4.6;
         const outerRadius = 7;
         const thetaSegments = 18;
         const saturnRingGeometry = new THREE.RingGeometry(innerRadius, outerRadius, thetaSegments);
         const saturnRing = new THREE.Mesh(saturnRingGeometry, saturnRingMaterial);
-        saturnRing.position.x = 100;
-        scene.add(saturnRing);
-        objectsInSolarSystem.push(saturn);
+        saturnRing.position.x = positions[5];
+        const saturnRingRotation = new THREE.Object3D();
+        saturnRingRotation.add(saturnRing);
+        scene.add(saturnRingRotation);
 
         // Uranus
         const uranusMaterial = new THREE.MeshPhongMaterial({color: 0x008992, emissive: 0x000305});
@@ -160,7 +174,9 @@ class SolarSystem extends React.Component {
                 objectsForRotationAroundThemselves[rotationIndex].rotation.y = (1 / speedsAroundThemselves[rotationIndex]) * time;
                 rotationIndex += 1;
             }
-            saturnRing.rotation.z = (1 / speedsAroundSun[5]) * time;    // TODO: Fix so that ring goes around together with Saturn
+            saturnRingRotation.rotation.z = (1 / speedsAroundSun[5]) * time;
+            moonRotation.rotation.z = (1 / speedsAroundSun[2]) * time;
+            moonRotationAroundEarth.rotation.z = (1 / 0.182) * time;
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
